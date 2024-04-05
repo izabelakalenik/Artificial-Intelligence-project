@@ -7,7 +7,7 @@ import utils
 
 class KMeans:
 
-    def __init__(self, X, K=1, options=None):
+    def __init__(self, X, K = 1, options=None):
         """
          Constructor of KMeans class
              Args:
@@ -34,7 +34,12 @@ class KMeans:
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
-        self.X = np.random.rand(100, 5)
+
+        Y = X.astype(float)
+        num_rows, num_col, dimension = Y.shape
+        N = num_rows * num_col
+        Y = np.reshape(Y, (N, 3))
+        self.X = Y
 
     def _init_options(self, options=None):
         """
@@ -150,7 +155,7 @@ def distance(X, C):
 
     Returns:
         dist: PxK numpy array position ij is the distance between the
-        i-th point of the first set an the j-th point of the second set
+        i-th point of the first set and the j-th point of the second set
     """
 
     #########################################################
