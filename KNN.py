@@ -14,7 +14,7 @@ class KNN:
         #############################################################
         ##  THIS FUNCTION CAN BE MODIFIED FROM THIS POINT, if needed
         #############################################################
-
+    #     checks
     def _init_train(self, train_data):
         """
         initializes the train data
