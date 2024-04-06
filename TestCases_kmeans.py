@@ -28,6 +28,7 @@ class TestCases(unittest.TestCase):
             np.testing.assert_array_equal(km.X, self.test_cases['shape'][ix])
 
     def test_03_init_centroids(self):
+        print(self.test_cases['K'])
         for ix, input in enumerate(self.test_cases['input']):
             km = KMeans(input, self.test_cases['K'][ix])
             km._init_centroids()

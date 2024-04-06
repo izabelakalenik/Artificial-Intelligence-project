@@ -77,11 +77,16 @@ class KMeans:
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
         if self.options['km_init'].lower() == 'first':
+            unique_elements, index = np.unique(self.X, axis=0, return_index=True)
+            self.centroids = np.array([self.X[i] for i in sorted(index)[:self.K]])
+        elif self.options['km_init'].lower() == 'random':
             self.centroids = np.random.rand(self.K, self.X.shape[1])
-            self.old_centroids = np.random.rand(self.K, self.X.shape[1])
-        else:
-            self.centroids = np.random.rand(self.K, self.X.shape[1])
-            self.old_centroids = np.random.rand(self.K, self.X.shape[1])
+        elif self.options['km_init'].lower() == 'custom':
+            diagonal_points = np.zeros((self.K, self.X.shape[1]))
+            for i in range(self.K):
+                diagonal_points[i] = np.full((self.X.shape[1],), i)
+            self.centroids = diagonal_points
+        self.old_centroids = np.zeros((self.K, self.X.shape[1]))
 
     def get_labels(self):
         """
