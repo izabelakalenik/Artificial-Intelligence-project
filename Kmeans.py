@@ -96,7 +96,9 @@ class KMeans:
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
-        self.labels = np.random.randint(self.K, size=self.X.shape[0])
+
+        distances = distance(self.X, self.centroids)
+        self.labels = np.argmin(distances, axis=1)
 
     def get_centroids(self):
         """
@@ -167,7 +169,8 @@ def distance(X, C):
     ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
     ##  AND CHANGE FOR YOUR OWN CODE
     #########################################################
-    return np.random.rand(X.shape[0], C.shape[0])
+    eucl_dist = np.sqrt(np.sum((X[:, None] - C) ** 2, axis=-1))
+    return eucl_dist
 
 
 def get_colors(centroids):
