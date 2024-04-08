@@ -1,4 +1,4 @@
-__authors__ = 'TO_BE_FILLED'
+__authors__ = ['1716921', '', '']
 __group__ = 'TO_BE_FILLED'
 
 import numpy as np
@@ -86,7 +86,7 @@ class KMeans:
             for i in range(self.K):
                 diagonal_points[i] = np.full((self.X.shape[1],), i)
             self.centroids = diagonal_points
-        self.old_centroids = np.zeros((self.K, self.X.shape[1]))
+        self.old_centroids = np.random.rand((self.K, self.X.shape[1]))
 
     def get_labels(self):
         """
