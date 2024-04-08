@@ -1,4 +1,4 @@
-__authors__ = ['1716921', '', '']
+__authors__ = ['1716921', '1718541', '']
 __group__ = 'TO_BE_FILLED'
 
 import numpy as np
@@ -108,6 +108,9 @@ class KMeans:
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
+        # for i in range(self.K):
+        #     self.centroids[i] = np.mean(self.X[self.labels == i], axis=0)
+
         pass
 
     def converges(self):
