@@ -19,9 +19,12 @@ class KMeans:
         self._init_X(X)
         self._init_options(options)  # DICT options
 
-    #############################################################
-    ##  THIS FUNCTION CAN BE MODIFIED FROM THIS POINT, if needed
-    #############################################################
+        #############################################################
+        ##  THIS FUNCTION CAN BE MODIFIED FROM THIS POINT, if needed
+        #############################################################
+        self.labels = None
+        self.centroids = None
+        self.old_centroids = None
 
     def _init_X(self, X):
         """Initialization of all pixels, sets X as an array of data in vector form (PxD)
@@ -30,10 +33,6 @@ class KMeans:
                     if matrix has more than 2 dimensions, the dimensionality of the sample space is the length of
                     the last dimension
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
 
         Y = X.astype(float)
         num_rows, num_col, dimension = Y.shape
@@ -72,10 +71,6 @@ class KMeans:
         Initialization of centroids
         """
 
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
         if self.options['km_init'].lower() == 'first':
             unique_elements, index = np.unique(self.X, axis=0, return_index=True)
             self.centroids = np.array([self.X[i] for i in sorted(index)[:self.K]])
@@ -94,10 +89,6 @@ class KMeans:
         """
         Calculates the closest centroid of all points in X and assigns each point to the closest centroid
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
 
         distances = distance(self.X, self.centroids)
         self.labels = np.argmin(distances, axis=1)
@@ -106,10 +97,6 @@ class KMeans:
         """
         Calculates coordinates of centroids based on the coordinates of all the points assigned to the centroid
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
 
         self.old_centroids = np.copy(self.centroids)
 
@@ -120,10 +107,7 @@ class KMeans:
         """
         Checks if there is a difference between current and old centroids
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
+
         if np.allclose(self.centroids, self.old_centroids, atol=self.options['tolerance']):
             return True
         return False
@@ -133,6 +117,7 @@ class KMeans:
         Runs K-Means algorithm until it converges or until the number of iterations is smaller
         than the maximum number of iterations.
         """
+
         self.num_iter = 0
         self._init_centroids()
         while self.num_iter < self.options['max_iter']:
@@ -146,12 +131,10 @@ class KMeans:
         """
          returns the within class distance of the current clustering
         """
-
         #######################################################
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
-
 
     def find_bestK(self, max_K):
         """
@@ -175,10 +158,6 @@ def distance(X, C):
         i-th point of the first set and the j-th point of the second set
     """
 
-    #########################################################
-    ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-    ##  AND CHANGE FOR YOUR OWN CODE
-    #########################################################
     return np.linalg.norm(X[:, None] - C, axis=-1)
 
 
@@ -192,12 +171,8 @@ def get_colors(centroids):
         labels: list of K labels corresponding to one of the 11 basic colors
     """
 
-    #########################################################
-    ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-    ##  AND CHANGE FOR YOUR OWN CODE
-    #########################################################
+    color_probabilities = utils.get_color_prob(centroids)
+    max_prob_index = np.argmax(color_probabilities, axis=1)
+    color_labels = utils.colors[max_prob_index]
 
-    # for centroid in centroids:
-        # utils.get_color_prob(centroid)
-    # woring on it too
-    return list(utils.colors)
+    return color_labels
