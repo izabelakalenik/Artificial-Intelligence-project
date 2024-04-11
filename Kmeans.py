@@ -87,8 +87,8 @@ class KMeans:
                 diagonal_points[i] = np.full((self.X.shape[1],), i)
             self.centroids = diagonal_points
         # self.old_centroids = np.random.rand((self.K, self.X.shape[1]))
-        self.old_centroids = np.copy(self.centroids)
-        # self.old_centroids = np.zeros((self.K, self.X.shape[1]))
+        self.old_centroids = np.copy(self.centroids)  # something was wrong here, I changed it to this
+        # self.old_centroids = np.zeros((self.K, self.X.shape[1]))  # this was the solution before thr random one
 
     def get_labels(self):
         """
@@ -133,11 +133,14 @@ class KMeans:
         Runs K-Means algorithm until it converges or until the number of iterations is smaller
         than the maximum number of iterations.
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
-        pass
+        self.num_iter = 0
+        self._init_centroids()
+        while self.num_iter < self.options['max_iter']:
+            self.get_labels()
+            self.get_centroids()
+            self.num_iter += 1
+            if self.converges():
+                break
 
     def withinClassDistance(self):
         """
@@ -148,7 +151,7 @@ class KMeans:
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
-        pass
+
 
     def find_bestK(self, max_K):
         """
@@ -158,7 +161,6 @@ class KMeans:
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
-        pass
 
 
 def distance(X, C):
@@ -177,8 +179,7 @@ def distance(X, C):
     ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
     ##  AND CHANGE FOR YOUR OWN CODE
     #########################################################
-    eucl_dist = np.sqrt(np.sum((X[:, None] - C) ** 2, axis=-1))
-    return eucl_dist
+    return np.linalg.norm(X[:, None] - C, axis=-1)
 
 
 def get_colors(centroids):
@@ -195,4 +196,8 @@ def get_colors(centroids):
     ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
     ##  AND CHANGE FOR YOUR OWN CODE
     #########################################################
+
+    # for centroid in centroids:
+        # utils.get_color_prob(centroid)
+    # woring on it too
     return list(utils.colors)
