@@ -7,7 +7,7 @@ import utils
 
 class KMeans:
 
-    def __init__(self, X, K = 1, options=None):
+    def __init__(self, X, K=1, options=None):
         """
          Constructor of KMeans class
              Args:
@@ -89,6 +89,7 @@ class KMeans:
         # self.old_centroids = np.random.rand((self.K, self.X.shape[1]))
         self.old_centroids = np.copy(self.centroids)
         # self.old_centroids = np.zeros((self.K, self.X.shape[1]))
+
     def get_labels(self):
         """
         Calculates the closest centroid of all points in X and assigns each point to the closest centroid
@@ -115,7 +116,6 @@ class KMeans:
         for i in range(self.K):
             self.centroids[i] = np.mean(self.X[self.labels == i], axis=0)
 
-
     def converges(self):
         """
         Checks if there is a difference between current and old centroids
@@ -124,7 +124,9 @@ class KMeans:
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
-        return True
+        if np.allclose(self.centroids, self.old_centroids, atol=self.options['tolerance']):
+            return True
+        return False
 
     def fit(self):
         """
