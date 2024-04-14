@@ -1,5 +1,5 @@
 __authors__ = ['1716921', '1718541', '1720318']
-__group__ = 'TO_BE_FILLED'
+__group__ = ''
 
 import numpy as np
 import utils
@@ -58,10 +58,10 @@ class KMeans:
             options['max_iter'] = np.inf
         if 'fitting' not in options:
             options['fitting'] = 'WCD'  # within class distance.
-        if 'threshold' not in options:  
-            options['threshold'] = 20  
+        if 'threshold' not in options:
+            options['threshold'] = 20
 
-        # If your methods need any other parameter you can add it to the options dictionary
+            # If your methods need any other parameter you can add it to the options dictionary
         self.options = options
 
         #############################################################
@@ -83,9 +83,7 @@ class KMeans:
             for i in range(self.K):
                 diagonal_points[i] = np.full((self.X.shape[1],), i)
             self.centroids = diagonal_points
-        # self.old_centroids = np.random.rand((self.K, self.X.shape[1]))
-        self.old_centroids = np.copy(self.centroids)  # something was wrong here, I changed it to this
-        # self.old_centroids = np.zeros((self.K, self.X.shape[1]))  # this was the solution before thr random one
+        self.old_centroids = np.copy(self.centroids)
 
     def get_labels(self):
         """
@@ -129,48 +127,40 @@ class KMeans:
             if self.converges():
                 break
 
-
     def withinClassDistance(self):
         """
          returns the within class distance of the current clustering
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
+
         wcd = 0
         for i in range(self.K):
             cluster_points = self.X[self.labels == i]  # Points in current cluster
             centroid = self.centroids[i]  # Centroid of current cluster
-            
+
             # Sum of squared distances from each point to the centroid
-            sum_squared_distances = np.sum((cluster_points - centroid)**2)
+            sum_squared_distances = np.sum((cluster_points - centroid) ** 2)
             wcd += sum_squared_distances
 
         # Divide by total nr of points in all K clusters
-        wcd /= len(self.X)  
+        wcd /= len(self.X)
         return wcd
-
 
     def find_bestK(self, max_K):
         """
          sets the best k analysing the results up to 'max_K' clusters
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
+
         wcd_values = []
         for k in range(2, max_K + 1):
             self.K = k
             self.fit()
             wcd = self.withinClassDistance()
 
-            if k > 2: 
-                pct_decrease = 100 * (1 - (wcd / wcd_values[-1])) 
+            if k > 2:
+                pct_decrease = 100 * (1 - (wcd / wcd_values[-1]))
                 if pct_decrease < self.options['threshold']:
                     self.K = k - 1
-                    return k - 1   # Return last k that was above the threshold
+                    return k - 1  # Return last k that was above the threshold
             wcd_values.append(wcd)
 
         # If decrease never fell below the threshold
