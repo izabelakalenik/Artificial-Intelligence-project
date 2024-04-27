@@ -1,10 +1,11 @@
 __authors__ = ['1716921', '1718541', '1720318']
-__group__ = 'noneyet'
+__group__ = '213'
 
 import numpy as np
 import math
 import operator
 from scipy.spatial.distance import cdist
+from collections import Counter
 
 
 class KNN:
@@ -62,7 +63,19 @@ class KNN:
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
-        return np.random.randint(10, size=self.neighbors.size), np.random.random(self.neighbors.size)
+        # Initialize an empty array to store the predicted classes
+        predicted_classes = np.empty(len(self.neighbors), dtype=self.neighbors.dtype)
+
+        # Iterate over each row of neighbors
+        for i, row in enumerate(self.neighbors):
+            # Count the occurrences of each label while maintaining order
+            label_counter = Counter(row)
+            # Find the label with the maximum count
+            predicted_class = max(label_counter, key=label_counter.get)
+            # Store the predicted class for this row
+            predicted_classes[i] = predicted_class
+
+        return predicted_classes
 
     def predict(self, test_data, k):
         """

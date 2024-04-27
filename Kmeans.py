@@ -126,6 +126,7 @@ class KMeans:
             self.num_iter += 1
             if self.converges():
                 break
+        return self.centroids
 
     def withinClassDistance(self):
         """
@@ -165,7 +166,6 @@ class KMeans:
 
         # If decrease never fell below the threshold
         return max_K
-
 
 def distance(X, C):
     """
