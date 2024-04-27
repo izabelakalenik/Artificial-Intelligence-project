@@ -12,9 +12,6 @@ class KNN:
     def __init__(self, train_data, labels):
         self._init_train(train_data)
         self.labels = np.array(labels)
-        #############################################################
-        ##  THIS FUNCTION CAN BE MODIFIED FROM THIS POINT, if needed
-        #############################################################
         self.neighbors = None
 
     def _init_train(self, train_data):
@@ -59,10 +56,6 @@ class KNN:
         :return: 1 array of Nx1 elements. For each of the rows in self.neighbors gets the most voted value
                 (i.e. the class at which that row belongs)
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
         # Initialize an empty array to store the predicted classes
         predicted_classes = np.empty(len(self.neighbors), dtype=self.neighbors.dtype)
 
