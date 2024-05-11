@@ -177,9 +177,7 @@ if __name__ == '__main__':
 
     def Retrival_combined(list_image, color_tags, shape_tags, colour_question, shape_question, colour_percentage=None, shape_percentage=None):
         colour_images = Retrival_by_colour(list_image, color_tags, colour_question, colour_percentage)
-        visualize_retrieval(colour_images, 20)
         shape_images = Retrival_by_shape(list_image, shape_tags, shape_question, shape_percentage)
-        visualize_retrieval(shape_images, 20)
         combined_images = []
         for ci in colour_images:
             for si in shape_images:
@@ -188,40 +186,56 @@ if __name__ == '__main__':
                     break
         return combined_images
 
-    # test of the functions
-    images1 = Retrival_by_shape(imgs, class_labels,"Shorts")
-    images2 = Retrival_by_shape(train_imgs, train_class_labels, "Dresses")
-    visualize_retrieval(images1, 20)
-    visualize_retrieval(images2, 100)
-
-    colour1 = Retrival_by_colour(imgs, color_labels, "White")
-    visualize_retrieval(colour1, 50)
-
-    combined = Retrival_combined(imgs, color_labels, class_labels, "Blue", "Shorts")
-    visualize_retrieval(combined, 20)
-
+    # Run kmeans and knn
     options = {
         'km_init': 'random',
         'max_iter': 10,
         'tolerance': 1e-4
     }
-    print("K-Mean Statistics Analysis")
-    Kmean_statistics(imgs, Kmax=10, options=options)
 
-    print("\nK-Means Color Prediction")
-    kmeans_predictions = []
-    for img in cropped_images:
-        kmeans = KMeans(img, K=5, options=options)
+    #kmeans_predictions = []
+    #for img in cropped_images:
+        #kmeans = KMeans(img, K=5, options=options)
+        #kmeans.fit()
+        #predicted_colors = get_colors(kmeans.centroids)
+        #kmeans_predictions.append(predicted_colors)
+
+    knn = KNN(train_imgs, train_class_labels)
+    #knn_predictions = knn.predict(test_imgs, k=3)
+
+    kmeans_images = []
+    for image in imgs:
+        kmeans = KMeans(image, K=5, options=options)
         kmeans.fit()
         predicted_colors = get_colors(kmeans.centroids)
-        kmeans_predictions.append(predicted_colors)
+        kmeans_images.append(predicted_colors)
 
-    color_precision, color_recall, color_f1 = get_color_accuracy(kmeans_predictions, color_labels)
-    print(f"Avarage Color Accuracy - Precision for all images: {color_precision:.2f}, Recall: {color_recall:.2f}, F1 Score: {color_f1:.2f}")
+    knn_qualitative = knn.predict(imgs, k=3)
 
-    print("\nKNN Shape Prediction")
-    knn = KNN(train_imgs, train_class_labels)
-    knn_predictions = knn.predict(test_imgs, k=3)
-    shape_accuracy = Get_shape_accuracy(knn_predictions, test_class_labels)
+    # test of the functions
+    visualize_retrieval(imgs[:60, :, :, :], 60)
+    visualize_retrieval(imgs[60:120, :, :, :], 60)
+    visualize_retrieval(imgs[120:180, :, :, :], 60)
+
+    images1 = Retrival_by_shape(imgs, knn_qualitative, "Shorts")
+    images2 = Retrival_by_shape(imgs, knn_qualitative, "Dresses")
+    visualize_retrieval(images1, 20)
+    visualize_retrieval(images2, 20)
+
+    colour1 = Retrival_by_colour(imgs, kmeans_images, "White")
+    visualize_retrieval(colour1, 50)
+
+    combined = Retrival_combined(imgs, kmeans_images, class_labels, "Blue", "Shorts")
+    visualize_retrieval(combined, 20)
+
+    #print("K-Mean Statistics Analysis")
+    #Kmean_statistics(imgs, Kmax=10, options=options)
+
+    #print("\nK-Means Color Prediction")
+    #color_precision, color_recall, color_f1 = get_color_accuracy(kmeans_predictions, color_labels)
+    #print(f"Avarage Color Accuracy - Precision for all images: {color_precision:.2f}, Recall: {color_recall:.2f}, F1 Score: {color_f1:.2f}")
+
+    #print("\nKNN Shape Prediction")
+    #shape_accuracy = Get_shape_accuracy(knn_predictions, test_class_labels)
     #there is a problem with the shapes -  i will look later - but i just wanted to have it uploaded
-    # print(f"Shape Classification Accuracy: {shape_accuracy:.2f}%")
+    #print(f"Shape Classification Accuracy: {shape_accuracy:.2f}%")

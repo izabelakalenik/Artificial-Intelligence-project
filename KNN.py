@@ -39,10 +39,10 @@ class KNN:
                  the ij-th entry is the j-th nearest train point to the i-th test point
         """
         # Resize test_data to match the dimensions of train_data
-        resized_test_data = np.resize(test_data, self.train_data.shape)
-
+        flattened_testdata = test_data.reshape(test_data.shape[0], -1)
+        #resized_test_data = np.resize(test_data, self.train_data.shape)
         # Compute the distance between test_data and train_data
-        distances = cdist(resized_test_data, self.train_data)
+        distances = cdist(flattened_testdata, self.train_data)
 
         # Get the indices of the k nearest neighbors for each sample in the test
         indices = np.argsort(distances, axis=1)[:, :k]
