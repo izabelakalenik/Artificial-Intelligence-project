@@ -131,6 +131,7 @@ class KMeans:
     def withinClassDistance(self):
         """
          returns the within class distance of the current clustering
+         within-class distance measures the compactness of the clusters
         """
 
         wcd = 0
@@ -147,6 +148,10 @@ class KMeans:
         return wcd
     
     def interClassDistance(self):
+        """
+        returns the inter class distance of the current clustering
+        inter-class distance measures how well-separated the clusters are
+        """
         inter_class_dist = 0
         num_pairs = 0
         for i in range(self.K):
@@ -161,6 +166,7 @@ class KMeans:
     def fisherDiscriminant(self):
         """
          returns the fisherDiscriminant of the current clustering
+         gives a ratio of the compactness of the clusters to their separation
         """
         intra_class_dist = self.withinClassDistance()
         inter_class_dist = self.interClassDistance()
