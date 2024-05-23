@@ -1,9 +1,7 @@
 __authors__ = ['1716921', '1718541', '1720318']
 __group__ = '213'
 
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+#from sklearn.model_selection import train_test_split
 from utils_data import read_dataset, read_extended_dataset, crop_images, visualize_retrieval
 from Kmeans import KMeans, get_colors
 from KNN import KNN
@@ -297,30 +295,30 @@ if __name__ == '__main__':
 
     k_range = range(1, 10) 
     options = {
-        'km_init': 'random',
-        'max_iter': 10,
+        'km_init': 'first',
+        'max_iter': 50,
         'tolerance': 1e-4
     }
 
     #########################################   KNN   #########################################
 
-    knn = KNN(train_imgs, train_class_labels)
-    #train_class_labels ['Shorts' 'Heels' 'Shorts' ... 'Sandals' 'Shirts' 'Jeans']
-    knn_imgs_predictions = knn.predict(imgs, k=3)
-    knn_test_predictions = knn.predict(test_imgs, k=3)
-
-    # Show predictions for the first 20 images: Prediction of KNN vs Ground Truth
-    visualize_knn_shape_predictions(test_imgs[:20], knn_test_predictions[:20], test_class_labels[:20], 20)
-    visualize_knn_shape_predictions(imgs[:20], knn_imgs_predictions[:20], class_labels[:20], 20)
-
-    accuracy = get_shape_accuracy(knn_test_predictions, test_class_labels)
-    print("Shape classification accuracy for test set with k=3:", accuracy) #90.951821386604
-    accuracy = get_shape_accuracy(knn_imgs_predictions, class_labels)
-    print("Shape classification accuracy for imgs set with k=3:", accuracy) #93.33333333333333
+    #knn = KNN(train_imgs, train_class_labels)
+    ##train_class_labels ['Shorts' 'Heels' 'Shorts' ... 'Sandals' 'Shirts' 'Jeans']
+    #knn_imgs_predictions = knn.predict(imgs, k=3)
+    #knn_test_predictions = knn.predict(test_imgs, k=3)
+    #
+    ## Show predictions for the first 20 images: Prediction of KNN vs Ground Truth
+    #visualize_knn_shape_predictions(test_imgs[:20], knn_test_predictions[:20], test_class_labels[:20], 20)
+    #visualize_knn_shape_predictions(imgs[:20], knn_imgs_predictions[:20], class_labels[:20], 20)
+    #
+    #accuracy = get_shape_accuracy(knn_test_predictions, test_class_labels)
+    #print("Shape classification accuracy for test set with k=3:", accuracy) #90.951821386604
+    #accuracy = get_shape_accuracy(knn_imgs_predictions, class_labels)
+    #print("Shape classification accuracy for imgs set with k=3:", accuracy) #93.33333333333333
 
     #Evaluating test and imgs datasets for accuracy in shape predictions with knn over more k's
-    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range)
-    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, imgs, class_labels, k_range)
+    #plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range)
+    #plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, imgs, class_labels, k_range)
   
     #########################################   KMEANS    #########################################
 
@@ -335,12 +333,12 @@ if __name__ == '__main__':
         kmeans_images.append(predicted_colors)
         kmeans_predicted_labels.append(set(predicted_colors))
     
-    for image in cropped_images:
-        kmeans = KMeans(image, K=3, options=options)
-        kmeans.fit()
-        predicted_colors = get_colors(kmeans.centroids)
-        kmeans_predicted_cropped_labels.append(set(predicted_colors))
-
+   # for image in cropped_images:
+   #     kmeans = KMeans(image, K=3, options=options)
+   #     kmeans.fit()
+   #     predicted_colors = get_colors(kmeans.centroids)
+   #     kmeans_predicted_cropped_labels.append(set(predicted_colors))
+   #
     ground_truth_labels = []
     for gt_colors in color_labels:
         ground_truth_labels.append(set(gt_colors))
@@ -348,13 +346,13 @@ if __name__ == '__main__':
     #Accuracy scores = vectors of f1 scores with f1 score for each image comparing kmeans prediction with true label
     #Example accuracy scores [0.8, 0.5, 0, 0.4, 0, 0, 0.4, 0.5, 0.5, 0, 0.4, 0.3333333333333333, 0.5, 0.8 , ...]
     accuracy_scores = get_color_accuracy(kmeans_predicted_labels, ground_truth_labels)
-    accuracy_scores_cropped = get_color_accuracy(kmeans_predicted_cropped_labels, ground_truth_labels)
+    #accuracy_scores_cropped = get_color_accuracy(kmeans_predicted_cropped_labels, ground_truth_labels)
 
     # Visualization showing for each image: F1 score, predicted colors, label colors
-    visualize_kmeans_color_predictions(cropped_images, accuracy_scores_cropped, kmeans_predicted_cropped_labels, ground_truth_labels, 20)
+    #visualize_kmeans_color_predictions(cropped_images, accuracy_scores_cropped, kmeans_predicted_cropped_labels, ground_truth_labels, 20)
     visualize_kmeans_color_predictions(imgs, accuracy_scores, kmeans_predicted_labels, ground_truth_labels, 20)
 
-    visualize_kmeans_color_predictions(cropped_images[20:], accuracy_scores_cropped[20:], kmeans_predicted_cropped_labels[20:], ground_truth_labels[20:], 20)
+    #visualize_kmeans_color_predictions(cropped_images[20:], accuracy_scores_cropped[20:], kmeans_predicted_cropped_labels[20:], ground_truth_labels[20:], 20)
     visualize_kmeans_color_predictions(imgs[20:, :, :, :], accuracy_scores[20:], kmeans_predicted_labels[20:], ground_truth_labels[20:], 20)
 
     #TO PLOT FOR REPORT COULD CHANGE CROPPED_IMAGES TO IMAGES AND KMAX TO OTHER 
@@ -365,25 +363,25 @@ if __name__ == '__main__':
 
     ###############################QUALITATIVE ANALYSIS FUNCTIONS##################################
 
-    # Visualise images
-    visualize_retrieval(imgs[:60, :, :, :], 60, title="First 60 Images")
-    visualize_retrieval(imgs[60:120, :, :, :], 60, title="Next 60 Images")
-    visualize_retrieval(imgs[120:180, :, :, :], 60, title="Third 60 Images")
-
-    #Retrieve and visualize images by shape for "Shorts"
-    images1 = retrival_by_shape(imgs, knn_imgs_predictions, "Shorts")
-    visualize_retrieval(images1, 20, title="Images of Shorts")
-
-    # Retrieve and visualize images by shape for "Dresses"
-    images2 = retrival_by_shape(imgs, knn_imgs_predictions, "Dresses")
-    visualize_retrieval(images2, 20, title="Images of Dresses")
-
-    # Retrieve and visualize images by color "White"
-    colour1 = retrival_by_colour(imgs, kmeans_images, "White")
-    visualize_retrieval(colour1, 50, title="Images with White Color")
-
-    # Retrieve and visualize combined images with specific color and shape
-    combined = retrival_combined(imgs, kmeans_images, class_labels, "Blue", "Shorts")
-    visualize_retrieval(combined, 20, title="Color: Blue, Shape: Shorts")
+    ## Visualise images
+    #visualize_retrieval(imgs[:60, :, :, :], 60, title="First 60 Images")
+    #visualize_retrieval(imgs[60:120, :, :, :], 60, title="Next 60 Images")
+    #visualize_retrieval(imgs[120:180, :, :, :], 60, title="Third 60 Images")
+    #
+    ##Retrieve and visualize images by shape for "Shorts"
+    #images1 = retrival_by_shape(imgs, knn_imgs_predictions, "Shorts")
+    #visualize_retrieval(images1, 20, title="Images of Shorts")
+    #
+    ## Retrieve and visualize images by shape for "Dresses"
+    #images2 = retrival_by_shape(imgs, knn_imgs_predictions, "Dresses")
+    #visualize_retrieval(images2, 20, title="Images of Dresses")
+    #
+    ## Retrieve and visualize images by color "White"
+    #colour1 = retrival_by_colour(imgs, kmeans_images, "White")
+    #visualize_retrieval(colour1, 50, title="Images with White Color")
+    #
+    ## Retrieve and visualize combined images with specific color and shape
+    #combined = retrival_combined(imgs, kmeans_images, class_labels, "Blue", "Shorts")
+    #visualize_retrieval(combined, 20, title="Color: Blue, Shape: Shorts")
 
     

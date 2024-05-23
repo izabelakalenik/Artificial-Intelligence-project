@@ -5,7 +5,6 @@ import numpy as np
 import utils
 import copy
 from math import floor
-import sys
 
 class KMeans:
 
@@ -100,32 +99,20 @@ class KMeans:
                     self.centroids[i:] = vfunc(np.sum(data_set[i*step:, 1:], axis=0), step)
                 else:
                     self.centroids[i:] = vfunc(np.sum(data_set[i * step:(i+1)*step, 1:], axis=0), step)
+                self.centroids = np.asarray(self.centroids)
         elif self.options['km_init'].lower() == 'plus_plus':
-            self.centroids = []
-            self.centroids.append(self.X[np.random.randint(self.X.shape[0]), :])
+            self.centroids = np.random.rand(self.K, self.X.shape[1])
+            for k in range(1, self.K):
+                dist_sq = np.array([min([np.inner(c-x,c-x) for c in self.centroids]) for x in self.X])
+                probs = dist_sq / dist_sq.sum()
+                cumulative_probs = probs.cumsum()
+                r = np.random.rand()
+                for j, p in enumerate(cumulative_probs):
+                    if r < p:
+                        index = j
+                        self.centroids[k] = self.X[index]
+                        break
 
-            # compute remaining k - 1 centroids
-            for c_id in range(self.K - 1):
-
-                # initialize a list to store distances of data
-                # points from nearest centroid
-                dist = []
-                for i in range(self.X.shape[0]):
-                    point = self.X[i, :]
-                    d = sys.maxsize
-
-                    # compute distance of 'point' from each of the previously
-                    # selected centroid and store the minimum distance
-                    for j in range(len(self.centroids)):
-                        temp_dist = distance(point, self.centroids[j])
-                        d = min(d, temp_dist)
-                    dist.append(d)
-
-                # select data point with maximum distance as our next centroid
-                dist = np.array(dist)
-                next_centroid = self.X[np.argmax(dist), :]
-                self.centroids.append(next_centroid)
-            self.centroids = np.array(self.centroids)
         self.old_centroids = copy.deepcopy(self.centroids)
 
     def get_labels(self):
@@ -195,15 +182,15 @@ class KMeans:
         returns the inter class distance of the current clustering
         inter-class distance measures how well-separated the clusters are
         """
-        inter_class_dist = 0
+        inter_class_dist = []
         num_pairs = 0
         for i in range(self.K):
             for j in range(i + 1, self.K):
-                if not np.isnan(self.centroids[i]).any() and not np.isnan(self.centroids[j]).any():
-                    dist = np.linalg.norm(self.X[self.labels == i] - self.X[self.labels == j], axis=1)
-                    inter_class_dist += dist
-                    num_pairs += 1
-        return inter_class_dist / num_pairs if num_pairs > 0 else np.nan
+                labels_i = self.X[self.labels == i]
+                expanded = labels_i[:, np.newaxis, :]
+                distances = np.linalg.norm(expanded - self.X[self.labels == j], axis=-1)
+                inter_class_dist.append(np.mean(distances))
+        return np.mean(inter_class_dist)
 
     def fisherDiscriminant(self):
         """
@@ -212,7 +199,7 @@ class KMeans:
         """
         intra_class_dist = self.withinClassDistance()
         inter_class_dist = self.interClassDistance()
-        return intra_class_dist / inter_class_dist if inter_class_dist != 0 else np.inf
+        return intra_class_dist / inter_class_dist
 
     def find_bestK(self, max_K):
         """
