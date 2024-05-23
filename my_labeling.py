@@ -296,8 +296,8 @@ if __name__ == '__main__':
 
     k_range = range(1, 11) 
     options = {
-        'km_init': 'random',
-        'max_iter': 10,
+        'km_init': 'first',
+        'max_iter': 50,
         'tolerance': 1e-4
     }
 
