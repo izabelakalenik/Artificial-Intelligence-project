@@ -145,6 +145,26 @@ class KMeans:
         # Divide by total nr of points in all K clusters
         wcd /= len(self.X)
         return wcd
+    
+    def interClassDistance(self):
+        inter_class_dist = 0
+        num_pairs = 0
+        for i in range(self.K):
+            for j in range(i + 1, self.K):
+                if not np.isnan(self.centroids[i]).any() and not np.isnan(self.centroids[j]).any():
+                    dist = np.linalg.norm(self.centroids[i] - self.centroids[j])
+                    inter_class_dist += dist
+                    num_pairs += 1
+        return inter_class_dist / num_pairs if num_pairs > 0 else np.nan
+
+
+    def fisherDiscriminant(self):
+        """
+         returns the fisherDiscriminant of the current clustering
+        """
+        intra_class_dist = self.withinClassDistance()
+        inter_class_dist = self.interClassDistance()
+        return intra_class_dist / inter_class_dist if inter_class_dist != 0 else np.inf
 
     def find_bestK(self, max_K):
         """
@@ -166,6 +186,7 @@ class KMeans:
 
         # If decrease never fell below the threshold
         return max_K
+    
 
 def distance(X, C):
     """
