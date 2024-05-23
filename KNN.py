@@ -6,11 +6,18 @@ import math
 import operator
 from scipy.spatial.distance import cdist
 from collections import Counter
+from skimage.transform import resize
+from skimage.color import rgb2hsv
 
 
 class KNN:
-    def __init__(self, train_data, labels):
-        self._init_train(train_data)
+    def __init__(self, train_data, labels, feature_method=2,downsample=False, downsample_factor=2):
+        # self._init_train(train_data)
+        self.feature_method = feature_method
+        self.downsample = downsample
+        self.downsample_factor = downsample_factor
+        self._init_train_advanced(train_data)
+ 
         self.labels = np.array(labels)
         self.neighbors = None
 
@@ -25,10 +32,44 @@ class KNN:
         train_data = np.array(train_data, dtype=float)
 
         # Flatten each grayscale image into a 1D array
+        # Initial train data (P, M, N, 3) , after reshape (P, M * N * 3)
         flattened_images = train_data.reshape(train_data.shape[0], -1)
 
         # Assign the train set to self.train_data
         self.train_data = flattened_images
+
+    def _init_train_advanced(self, train_data):
+        """
+        initializes the train data
+        :param train_data: PxMxNx3 matrix corresponding to P color images
+        :return: assigns the train set to the matrix self.train_data shaped as PxD (P points in a D dimensional space)
+        """
+        train_data = np.array(train_data, dtype=float)
+        processed_data = [self._extract_features(img) for img in train_data]
+        self.train_data = np.array(processed_data)
+        print(f"Training data shape after feature extraction: {self.train_data.shape}")
+
+    def _extract_features(self, img):
+        if self.feature_method == 1:
+            # Flatten the image with optional resizing
+            if self.downsample:
+                img = img[::self.downsample_factor, ::self.downsample_factor]
+            return img.reshape(-1)
+        elif self.feature_method == 2:
+            # Extract custom features: mean, variance, max, min pixel values
+            # mean_val = np.mean(img)
+            # var_val = np.var(img)
+            # upper_val = np.max(img)
+            # lower_val = np.min(img)
+            # return [mean_val, var_val, upper_val, lower_val]
+            hsv_img = rgb2hsv(img)
+            hue_mean = np.mean(hsv_img[:, :, 0])
+            saturation_mean = np.mean(hsv_img[:, :, 1])
+            brightness_mean = np.mean(hsv_img[:, :, 2])
+            return [hue_mean, saturation_mean, brightness_mean]
+        else:
+            raise ValueError("Invalid feature method specified")
+
 
     def get_k_neighbours(self, test_data, k):
         """
@@ -49,6 +90,16 @@ class KNN:
 
         # Store the labels of the k nearest neighbors
         self.neighbors = self.labels[indices]
+
+
+    def get_k_neighbours_advanced(self, test_data, k):
+        # Extract features for each image in the test set
+        processed_test_data = np.array([self._extract_features(img) for img in test_data])
+        print(f"Test data shape after feature extraction: {processed_test_data.shape}")
+
+        distances = cdist(processed_test_data, self.train_data)
+        indices = np.argsort(distances, axis=1)[:, :k]
+        self.neighbors = self.labels[indices]    
 
     def get_class(self):
         """
@@ -78,5 +129,5 @@ class KNN:
         :return: the output form get_class a Nx1 vector with the predicted shape for each test image
         """
 
-        self.get_k_neighbours(test_data, k)
+        self.get_k_neighbours_advanced(test_data, k)
         return self.get_class()

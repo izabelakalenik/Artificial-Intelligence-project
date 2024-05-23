@@ -51,23 +51,23 @@ def retrival_combined(list_image, color_tags, shape_tags, colour_question, shape
     return combined_images
 
 
-def plot_knn_accuracy_for_dataset(train_imgs, train_labels, test_imgs, test_labels, k_range):
+def plot_knn_accuracy_for_dataset(train_imgs, train_labels, test_imgs, test_labels, k_range, feature_method,  downsample, downsample_factor=None, method_label=""):
         accuracies = []
 
         for k in k_range:
-            knn = KNN(train_imgs, train_labels)
+            knn = KNN(train_imgs, train_labels, feature_method=feature_method,downsample=downsample, downsample_factor=downsample_factor)
             knn_predictions = knn.predict(test_imgs, k=k)
             accuracy = get_shape_accuracy(knn_predictions, test_labels)
             accuracies.append(accuracy)
             
-            print(f"K={k}: Shape classification accuracy for the dataset: {accuracy:.2f}%")
-
+            print(f"Method: {method_label}, K={k}: Accuracy = {accuracy:.2f}%")
+        
         # Plotting
         plt.figure(figsize=(10, 5))
-        plt.plot(k_range, accuracies, label=f'Accuracy for dataset', marker='o', color='blue')
+        plt.plot(k_range, accuracies, label=method_label, marker='o', color='blue')
         plt.xlabel('Number of Neighbors (k)')
         plt.ylabel('Accuracy (%)')
-        plt.title('KNN Classification Accuracy vs. k')
+        plt.title(f'KNN Classification Accuracy vs. k ({method_label})')
         plt.legend()
         plt.grid(True)
         plt.show()
@@ -155,7 +155,6 @@ def kmean_statistics(images, ground_truth_labels, Kmax, options=None):
         all_wcd_values.append(avg_wcd)
         all_inter_class_values.append(avg_inter_class_distance)
         all_fisher_values.append(avg_fisher_coeff)
-
         all_times.append(avg_time)
         all_iterations.append(avg_iterations)
 
@@ -295,7 +294,7 @@ if __name__ == '__main__':
     imgs, class_labels, color_labels, upper, lower, background = read_extended_dataset()
     cropped_images = crop_images(imgs, upper, lower)
 
-    k_range = range(1, 10) 
+    k_range = range(1, 11) 
     options = {
         'km_init': 'random',
         'max_iter': 10,
@@ -304,7 +303,7 @@ if __name__ == '__main__':
 
     #########################################   KNN   #########################################
 
-    knn = KNN(train_imgs, train_class_labels)
+    knn = KNN(train_imgs, train_class_labels, feature_method=1, downsample=False)
     #train_class_labels ['Shorts' 'Heels' 'Shorts' ... 'Sandals' 'Shirts' 'Jeans']
     knn_imgs_predictions = knn.predict(imgs, k=3)
     knn_test_predictions = knn.predict(test_imgs, k=3)
@@ -318,9 +317,15 @@ if __name__ == '__main__':
     accuracy = get_shape_accuracy(knn_imgs_predictions, class_labels)
     print("Shape classification accuracy for imgs set with k=3:", accuracy) #93.33333333333333
 
-    #Evaluating test and imgs datasets for accuracy in shape predictions with knn over more k's
-    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range)
-    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, imgs, class_labels, k_range)
+    # Plot accuracy for normal flatten without downsample
+    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=1, downsample=False, method_label="Flatten Without Downsampling")
+
+    # Plot accuracy for normal flatten with downsample
+    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=1, downsample=True, downsample_factor=2, method_label="Flatten With Downsampling")
+
+    # Plot accuracy for custom features
+    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=2, downsample=False, method_label="Custom Features")
+   
   
     #########################################   KMEANS    #########################################
 
