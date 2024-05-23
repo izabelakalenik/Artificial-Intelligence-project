@@ -200,11 +200,10 @@ class KMeans:
         for i in range(self.K):
             for j in range(i + 1, self.K):
                 if not np.isnan(self.centroids[i]).any() and not np.isnan(self.centroids[j]).any():
-                    dist = np.linalg.norm(self.centroids[i] - self.centroids[j])
+                    dist = np.linalg.norm(self.X[self.labels == i] - self.X[self.labels == j], axis=1)
                     inter_class_dist += dist
                     num_pairs += 1
         return inter_class_dist / num_pairs if num_pairs > 0 else np.nan
-
 
     def fisherDiscriminant(self):
         """
