@@ -3,7 +3,9 @@ __group__ = 'noneyet'
 
 import numpy as np
 import utils
-
+import copy
+from math import floor
+import sys
 
 class KMeans:
 
@@ -83,7 +85,48 @@ class KMeans:
             for i in range(self.K):
                 diagonal_points[i] = np.full((self.X.shape[1],), i)
             self.centroids = diagonal_points
-        self.old_centroids = np.copy(self.centroids)
+        elif self.options['km_init'].lower() == 'naive_sharding':
+            data_set = copy.deepcopy(self.X)
+            self.centroids = np.mat(np.zeros((self.K, data_set.shape[1])))
+            composite = np.mat(np.sum(data_set, axis=1))
+            data_set = np.append(composite.T, data_set, axis=1)
+            data_set.sort(axis=0)
+
+            step = floor(data_set.shape[0]/self.K)
+            vfunc = np.vectorize(get_mean)
+
+            for i in range(self.K):
+                if i == self.K-1:
+                    self.centroids[i:] = vfunc(np.sum(data_set[i*step:, 1:], axis=0), step)
+                else:
+                    self.centroids[i:] = vfunc(np.sum(data_set[i * step:(i+1)*step, 1:], axis=0), step)
+        elif self.options['km_init'].lower() == 'plus_plus':
+            self.centroids = []
+            self.centroids.append(self.X[np.random.randint(self.X.shape[0]), :])
+
+            # compute remaining k - 1 centroids
+            for c_id in range(self.K - 1):
+
+                # initialize a list to store distances of data
+                # points from nearest centroid
+                dist = []
+                for i in range(self.X.shape[0]):
+                    point = self.X[i, :]
+                    d = sys.maxsize
+
+                    # compute distance of 'point' from each of the previously
+                    # selected centroid and store the minimum distance
+                    for j in range(len(self.centroids)):
+                        temp_dist = distance(point, self.centroids[j])
+                        d = min(d, temp_dist)
+                    dist.append(d)
+
+                # select data point with maximum distance as our next centroid
+                dist = np.array(dist)
+                next_centroid = self.X[np.argmax(dist), :]
+                self.centroids.append(next_centroid)
+            self.centroids = np.array(self.centroids)
+        self.old_centroids = copy.deepcopy(self.centroids)
 
     def get_labels(self):
         """
@@ -224,3 +267,7 @@ def get_colors(centroids):
     color_labels = utils.colors[max_prob_index]
 
     return color_labels
+
+
+def get_mean(sums, step):
+    return sums/step
