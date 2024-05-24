@@ -1,7 +1,7 @@
 __authors__ = ['1716921', '1718541', '1720318']
 __group__ = '213'
 
-#from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
 from utils_data import read_dataset, read_extended_dataset, crop_images, visualize_retrieval
 from Kmeans import KMeans, get_colors
 from KNN import KNN
@@ -9,6 +9,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 from typing import Set
+from sklearn.metrics import silhouette_score
 
 
 def retrival_by_colour(list_images, tags, question, percentage=None):
@@ -295,30 +296,46 @@ def threshold_accuracy(imgs, ground_truth_labels, options):
 
     thresholds = [i for i in range(10, 40, 5)]
     print("thresholds", thresholds)
-    for i in range(40, 50, 5):
-        good_k = 0
+    for i in range(10, 40, 5):
         kmeans_predicted_labels = []
         options['threshold'] = i
         for image in imgs:
             kmeans = KMeans(image, K=3, options=options)
-            kmeans.find_bestK(10)
+            kmeans.find_bestK(6)
             kmeans.fit()
             predicted_colors = get_colors(kmeans.centroids)
             kmeans_predicted_labels.append(set(predicted_colors))
 
-        for pred, gt in zip(kmeans_predicted_labels, ground_truth_labels):
-            if len(pred) == len(gt):
-                good_k += 1
-        accuracies.append(good_k/len(imgs))
-        # accuracy is computed only according to the number of colours put in the ground truth labels and not on their value
+        print("acurracies")
+        accuracies.append(np.mean(get_color_accuracy(kmeans_predicted_labels, ground_truth_labels)))
 
     plt.figure(figsize=(10, 5))
     plt.plot(thresholds, accuracies, marker='o', linestyle='-', color='blue')
     plt.xlabel('Percentage of the threshold')
-    plt.ylabel('Average well determined K (%)')
-    plt.title('K-means threshold Accuracy (FD) vs. percentage of the threshold')
+    plt.ylabel('Average f1 values')
+    plt.title('K-means threshold Accuracy (ICD) vs. percentage of the threshold')
     plt.grid(True)
     plt.show()
+
+
+def silhouette_bestk(imgs, options, ground_truth_labels):
+    best_k = []
+    for image in imgs:
+        silhouette_img = []
+        for k in range(2, 9):
+            kmeans = KMeans(image, k, options)
+            kmeans.fit()
+            labels = kmeans.labels
+            silhouette_img.append(silhouette_score(kmeans.X, labels))
+        best_k.append(np.argmax(silhouette_img) + 1)
+    print(best_k)
+    print(ground_truth_labels)
+    good_k = 0
+    for k, gt in zip(best_k, ground_truth_labels):
+        if k == len(gt):
+            good_k += 1
+    accuracy = good_k / len(imgs)
+    return accuracy
 
 
 if __name__ == '__main__':
@@ -337,10 +354,10 @@ if __name__ == '__main__':
     k_range = range(1, 11)
     options = {
         'km_init': 'first',
-        'max_iter': 50,
+        'max_iter': 35,
         'tolerance': 1e-4,
-        'threshold': 10,
-        'fitting':'FD'
+        'threshold': 20,
+        'fitting':'WCD'
     }
 
     #########################################   KNN   #########################################
@@ -379,11 +396,12 @@ if __name__ == '__main__':
     #
     #for image in imgs:
     #    kmeans = KMeans(image, K=3, options=options)
+    #    kmeans.silhouette_bestK(6)
     #    kmeans.fit()
     #    predicted_colors = get_colors(kmeans.centroids)
     #    kmeans_images.append(predicted_colors)
     #    kmeans_predicted_labels.append(set(predicted_colors))
-
+    #
     #for image in cropped_images:
     #    kmeans = KMeans(image, K=3, options=options)
     #    kmeans.fit()
@@ -413,6 +431,9 @@ if __name__ == '__main__':
     #kmean_statistics(imgs, ground_truth_labels, Kmax=10, options=options)
 
     threshold_accuracy(imgs, ground_truth_labels, options)
+    #print(silhouette_bestk(imgs, options, ground_truth_labels))
+    #print("colour accuracy")
+    #print(np.mean(get_color_accuracy(kmeans_predicted_labels, ground_truth_labels)))
 
     ###############################QUALITATIVE ANALYSIS FUNCTIONS##################################
 

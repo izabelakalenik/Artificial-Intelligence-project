@@ -5,7 +5,7 @@ import numpy as np
 import utils
 import copy
 from math import floor
-import sys
+from sklearn.metrics import silhouette_score
 
 class KMeans:
 
@@ -213,12 +213,12 @@ class KMeans:
         """
         if self.options['fitting'] == 'WCD':
             wcd_values = []
-            for k in range(2, max_K + 1):
+            for k in range(1, max_K + 1):
                 self.K = k
                 self.fit()
                 wcd = self.withinClassDistance()
 
-                if k > 2:
+                if k > 1:
                     pct_decrease = 100 * (1 - (wcd / wcd_values[-1]))
                     if pct_decrease < self.options['threshold']:
                         self.K = k - 1
@@ -230,13 +230,12 @@ class KMeans:
 
         elif self.options['fitting'] == 'ICD':
             icd_values = []
-            print('ICD')
-            for k in range(2, max_K + 1):
+            for k in range(1, max_K + 1):
                 self.K = k
                 self.fit()
                 icd = self.interClassDistance()
 
-                if k > 2:
+                if k > 1:
                     pct_decrease = 100 * (1 - (icd / icd_values[-1]))
                     if pct_decrease < self.options['threshold']:
                         self.K = k - 1
@@ -246,12 +245,12 @@ class KMeans:
 
         elif self.options['fitting'] == 'FD':
             fisher_values = []
-            for k in range(2, max_K + 1):
+            for k in range(1, max_K + 1):
                 self.K = k
                 self.fit()
                 fd = self.fisherDiscriminant()
 
-                if k > 2:
+                if k > 1:
                     pct_decrease = 100 * (1 - (fd / fisher_values[-1]))
                     if pct_decrease < self.options['threshold']:
                         self.K = k - 1
@@ -260,7 +259,15 @@ class KMeans:
 
             # If decrease never fell below the threshold
             return max_K
-    
+
+    def silhouette_bestK(self, maxK):
+        silhouette_img = []
+        for k in range(2, maxK):
+            self.fit()
+            silhouette_img.append(silhouette_score(self.X, self.labels))
+        self.K = np.argmax(silhouette_img) + 2
+
+
 
 def distance(X, C):
     """
