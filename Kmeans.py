@@ -181,30 +181,35 @@ class KMeans:
         # Divide by total nr of points in all K clusters
         wcd /= len(self.X)
         return wcd
-    
+
     def interClassDistance(self):
         """
-        returns the inter class distance of the current clustering
-        inter-class distance measures how well-separated the clusters are
+        Returns the inter-class distance of the current clustering.
+        Inter-class distance measures how well-separated the clusters are.
         """
         inter_class_dist = []
         for i in range(self.K):
             labels_i = self.X[self.labels == i]
-            #print("labels i", labels_i)
+            if len(labels_i) == 0:  # Skip if there are no data points in the cluster
+                continue
             expanded = labels_i[:, np.newaxis, :]
             for j in range(i + 1, self.K):
-                #print("labels j", self.X[self.labels == j])
-                distances = np.linalg.norm(expanded - self.X[self.labels == j], axis=-1)
+                labels_j = self.X[self.labels == j]
+                if len(labels_j) == 0:  # Skip if there are no data points in the cluster
+                    continue
+                distances = np.linalg.norm(expanded - labels_j, axis=-1)
                 inter_class_dist.append(np.mean(distances))
-        return np.mean(inter_class_dist)
+        return np.mean(inter_class_dist) if inter_class_dist else 0.0
 
     def fisherDiscriminant(self):
         """
-         returns the fisherDiscriminant of the current clustering
-         gives a ratio of the compactness of the clusters to their separation
+        Returns the Fisher discriminant of the current clustering.
+        Gives a ratio of the compactness of the clusters to their separation.
         """
         intra_class_dist = self.withinClassDistance()
         inter_class_dist = self.interClassDistance()
+        if inter_class_dist == 0.0:  # Handle division by zero
+            return 0.0
         return intra_class_dist / inter_class_dist
 
     def find_bestK(self, max_K):

@@ -2,8 +2,6 @@ __authors__ = ['1716921', '1718541', '1720318']
 __group__ = '213'
 
 import numpy as np
-import math
-import operator
 from scipy.spatial.distance import cdist
 from collections import Counter
 from skimage.transform import resize
@@ -11,13 +9,13 @@ from skimage.color import rgb2hsv
 
 
 class KNN:
-    def __init__(self, train_data, labels, feature_method=2,downsample=False, downsample_factor=2):
+    def __init__(self, train_data, labels, feature_method=2, downsample=False, downsample_factor=2):
         # self._init_train(train_data)
         self.feature_method = feature_method
         self.downsample = downsample
         self.downsample_factor = downsample_factor
         self._init_train_advanced(train_data)
- 
+
         self.labels = np.array(labels)
         self.neighbors = None
 
@@ -57,7 +55,7 @@ class KNN:
             return img.reshape(-1)
 
         elif self.feature_method == 2:
-            #Extract custom features: mean, variance, max, min pixel values
+            # Extract custom features: mean, variance, max, min pixel values
             flattened_img = img.reshape(-1)
             mean_val = np.mean(img)
             var_val = np.var(img)
@@ -77,10 +75,9 @@ class KNN:
         else:
             raise ValueError("Invalid feature method specified")
 
-
     def get_k_neighbours(self, test_data, k):
         """
-        given a test_data matrix calculates de k nearest neighbours at each point (row) of test_data on self.neighbors
+        given a test_data matrix calculates the k nearest neighbours at each point (row) of test_data on self.neighbors
         :param test_data: array that has to be shaped to a NxD matrix (N points in a D dimensional space)
         :param k: the number of neighbors to look at
         :return: the matrix self.neighbors is created (NxK)
@@ -88,7 +85,7 @@ class KNN:
         """
         # Resize test_data to match the dimensions of train_data
         flattened_testdata = test_data.reshape(test_data.shape[0], -1)
-        #resized_test_data = np.resize(test_data, self.train_data.shape)
+        # resized_test_data = np.resize(test_data, self.train_data.shape)
         # Compute the distance between test_data and train_data
         distances = cdist(flattened_testdata, self.train_data)
 
@@ -98,14 +95,13 @@ class KNN:
         # Store the labels of the k nearest neighbors
         self.neighbors = self.labels[indices]
 
-
     def get_k_neighbours_advanced(self, test_data, k):
         # Extract features for each image in the test set
         processed_test_data = np.array([self._extract_features(img) for img in test_data])
 
         distances = cdist(processed_test_data, self.train_data)
         indices = np.argsort(distances, axis=1)[:, :k]
-        self.neighbors = self.labels[indices]    
+        self.neighbors = self.labels[indices]
 
     def get_class(self):
         """

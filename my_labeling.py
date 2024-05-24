@@ -89,21 +89,6 @@ def visualize_knn_shape_predictions(imgs, labels_predicted, labels_actual, topN)
     plt.show()
 
 
-def visualize_kmeans_color_predictions(imgs, accuracy_scores, predicted_labels, ground_truth_labels, topN):
-    plt.figure(figsize=(10, (topN // 4) * 3))
-    for i, (img, score, pred, gt) in enumerate(
-            zip(imgs[:topN], accuracy_scores[:topN], predicted_labels[:topN], ground_truth_labels[:topN])):
-        plt.subplot(topN // 4, 4, i + 1)
-        plt.imshow(img)
-        plt.title(f'F1: {score:.2f}', fontsize=10)  # Display the F1 score
-        plt.xlabel(f'Pred: {pred}\nGT: {gt}', fontsize=8)  # Display predicted and ground truth labels
-        plt.xticks([])  # Remove x-axis tick marks
-        plt.yticks([])  # Remove y-axis tick marks
-    plt.tight_layout()
-    plt.subplots_adjust(hspace=0.5)
-    plt.show()
-
-
 def kmean_statistics(images, ground_truth_labels, Kmax, options=None):
     overall_accuracy_scores = []
 
@@ -171,8 +156,12 @@ def kmean_statistics(images, ground_truth_labels, Kmax, options=None):
 
     print("all_inter_class_values:", all_inter_class_values)
     print("all_fisher_values:", all_fisher_values)
+
+    # Plotting
+    ks = range(2, Kmax + 1)
+
     plt.figure(figsize=(10, 5))
-    plt.plot(range(2, Kmax + 1), overall_accuracy_scores, marker='o', linestyle='-', color='blue')
+    plt.plot(ks, overall_accuracy_scores, marker='o', linestyle='-', color='blue')
     plt.xlabel('Number of Clusters (K)')
     plt.ylabel('Average F1 Score')
     plt.title('K-means Color Clustering Accuracy vs. Number of Clusters')
@@ -181,43 +170,54 @@ def kmean_statistics(images, ground_truth_labels, Kmax, options=None):
 
     plt.figure(figsize=(18, 6))
 
-    plt.subplot(1, 3, 1)
-    plt.plot(range(2, Kmax + 1), all_wcd_values, marker='o')
-    plt.xlabel('Number of Clusters (K)')
-    plt.ylabel('Within-Class Distance (WCD)')
-    plt.title('WCD vs K')
+    metrics = [
+        (all_wcd_values, 'Within-Class Distance (WCD)', 'blue'),
+        (all_inter_class_values, 'Inter-Class Distance', 'orange'),
+        (all_fisher_values, 'Fisher Coeff', 'green')
+    ]
 
-    plt.subplot(1, 3, 2)
-    plt.plot(range(2, Kmax + 1), all_inter_class_values, marker='o')
-    plt.xlabel('Number of Clusters (K)')
-    plt.ylabel('Inter-Class Distance')
-    plt.title('Inter-Class Distance vs K')
+    for i, (values, ylabel, color) in enumerate(metrics, 1):
+        plt.subplot(1, 3, i)
+        plt.plot(ks, values, marker='o', color=color)
+        plt.xlabel('Number of Clusters (K)')
+        plt.ylabel(ylabel)
+        plt.title(f'{ylabel} vs K')
+        plt.grid(True)
 
-    plt.subplot(1, 3, 3)
-    plt.plot(range(2, Kmax + 1), all_fisher_values, marker='o')
-    plt.xlabel('Number of Clusters (K)')
-    plt.ylabel('Fisher Coeff')
-    plt.title('Fisher Coeff vs K')
-
-    plt.grid(True)
     plt.subplots_adjust(left=0.05, right=0.95, wspace=0.3)
     plt.show()
 
     plt.figure(figsize=(18, 6))
 
-    plt.subplot(1, 3, 1)
-    plt.plot(range(2, Kmax + 1), all_times, marker='o', color='green')
-    plt.xlabel('Number of Clusters (K)')
-    plt.ylabel('Time (seconds)')
-    plt.title('Computation Time vs K')
+    time_metrics = [
+        (all_times, 'Time (seconds)', 'green'),
+        (all_iterations, 'Iterations', 'red')
+    ]
 
-    plt.subplot(1, 3, 2)
-    plt.plot(range(2, Kmax + 1), all_iterations, marker='x', color='red')
-    plt.xlabel('Number of Clusters (K)')
-    plt.ylabel('Iterations')
-    plt.title('Iterations vs K')
+    for i, (values, ylabel, color) in enumerate(time_metrics, 1):
+        plt.subplot(1, 2, i)
+        plt.plot(ks, values, marker='o', color=color)
+        plt.xlabel('Number of Clusters (K)')
+        plt.ylabel(ylabel)
+        plt.title(f'{ylabel} vs K')
+        plt.grid(True)
 
     plt.subplots_adjust(left=0.05, right=0.95, wspace=0.3)
+    plt.show()
+
+
+def visualize_kmeans_color_predictions(imgs, accuracy_scores, predicted_labels, ground_truth_labels, topN):
+    plt.figure(figsize=(10, (topN // 4) * 3))
+    for i, (img, score, pred, gt) in enumerate(
+            zip(imgs[:topN], accuracy_scores[:topN], predicted_labels[:topN], ground_truth_labels[:topN])):
+        plt.subplot(topN // 4, 4, i + 1)
+        plt.imshow(img)
+        plt.title(f'F1: {score:.2f}', fontsize=10)  # Display the F1 score
+        plt.xlabel(f'Pred: {pred}\nGT: {gt}', fontsize=8)  # Display predicted and ground truth labels
+        plt.xticks([])  # Remove x-axis tick marks
+        plt.yticks([])  # Remove y-axis tick marks
+    plt.tight_layout()
+    plt.subplots_adjust(hspace=0.5)
     plt.show()
 
 
@@ -276,8 +276,6 @@ def get_color_accuracy(predicted_labels, ground_truth_labels):
     Returns:
         f1_score (float): F1 scores for all images.
     """
-    precision_scores = []
-    recall_scores = []
     f1_scores = []
 
     for pred, gt in zip(predicted_labels, ground_truth_labels):
@@ -349,7 +347,7 @@ if __name__ == '__main__':
 
     # Load extended ground truth
     imgs, class_labels, color_labels, upper, lower, background = read_extended_dataset()
-    cropped_images = crop_images(imgs, upper, lower)
+    cropped_imgs = crop_images(imgs, upper, lower)
 
     k_range = range(1, 11)
     options = {
@@ -362,11 +360,11 @@ if __name__ == '__main__':
 
     #########################################   KNN   #########################################
 
-    #knn = KNN(train_imgs, train_class_labels, feature_method=1, downsample=False)
-    ##train_class_labels ['Shorts' 'Heels' 'Shorts' ... 'Sandals' 'Shirts' 'Jeans']
-    #knn_imgs_predictions = knn.predict(imgs, k=3)
-    #knn_test_predictions = knn.predict(test_imgs, k=3)
-    #
+    knn = KNN(train_imgs, train_class_labels, feature_method=1, downsample=False)
+    #train_class_labels ['Shorts' 'Heels' 'Shorts' ... 'Sandals' 'Shirts' 'Jeans']
+    knn_imgs_predictions = knn.predict(imgs, k=3)
+    knn_test_predictions = knn.predict(test_imgs, k=3)
+
     ## Show predictions for the first 20 images: Prediction of KNN vs Ground Truth
     #visualize_knn_shape_predictions(test_imgs[:20], knn_test_predictions[:20], test_class_labels[:20], 20)
     #visualize_knn_shape_predictions(imgs[:20], knn_imgs_predictions[:20], class_labels[:20], 20)
@@ -376,25 +374,25 @@ if __name__ == '__main__':
     #accuracy = get_shape_accuracy(knn_imgs_predictions, class_labels)
     #print("Shape classification accuracy for imgs set with k=3:", accuracy) #93.33333333333333
     #
-    ## Plot accuracy for normal flatten without downsample
-    #plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=1, downsample=False, method_label="Flatten Without Downsampling")
-    #
-    ## Plot accuracy for normal flatten with downsample
-    #plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=1, downsample=True, downsample_factor=2, method_label="Flatten With Downsampling")
-    #
-    ## Plot accuracy for custom features
-    #plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=2, downsample=False, method_label="Additional Custom Features [mean, var, upper, lower]")
-    #
-    #plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=3, downsample=False, method_label="Additional Custom Features [hue_mean, saturation_mean, brightness_mean]")
-    #
+    # Plot accuracy for normal flatten without downsample
+    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=1, downsample=False, method_label="Flatten Without Downsampling")
+
+    # Plot accuracy for normal flatten with downsample
+    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=1, downsample=True, downsample_factor=2, method_label="Flatten With Downsampling")
+
+    # Plot accuracy for custom features
+    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=2, downsample=False, method_label="Additional Custom Features [mean, var, upper, lower]")
+
+    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=3, downsample=False, method_label="Additional Custom Features [hue_mean, saturation_mean, brightness_mean]")
+
 
     #########################################   KMEANS    #########################################
 
-    #kmeans_images = []
-    #kmeans_predicted_labels = []
-    #kmeans_predicted_cropped_labels = []
+    # kmeans_images = []
+    # kmeans_predicted_labels = []
+    # kmeans_predicted_cropped_labels = []
     #
-    #for image in imgs:
+    # for image in imgs:
     #    kmeans = KMeans(image, K=3, options=options)
     #    kmeans.silhouette_bestK(6)
     #    kmeans.fit()
@@ -402,15 +400,15 @@ if __name__ == '__main__':
     #    kmeans_images.append(predicted_colors)
     #    kmeans_predicted_labels.append(set(predicted_colors))
     #
-    #for image in cropped_images:
+    # for image in cropped_imgs:
     #    kmeans = KMeans(image, K=3, options=options)
     #    kmeans.fit()
     #    predicted_colors = get_colors(kmeans.centroids)
     #    kmeans_predicted_cropped_labels.append(set(predicted_colors))
-
-    ground_truth_labels = []
-    for gt_colors in color_labels:
-        ground_truth_labels.append(set(gt_colors))
+    #
+    # ground_truth_labels = []
+    # for gt_colors in color_labels:
+    #     ground_truth_labels.append(set(gt_colors))
 
     #Accuracy scores = vectors of f1 scores with f1 score for each image comparing kmeans prediction with true label
     #Example accuracy scores [0.8, 0.5, 0, 0.4, 0, 0, 0.4, 0.5, 0.5, 0, 0.4, 0.3333333333333333, 0.5, 0.8 , ...]
@@ -428,9 +426,9 @@ if __name__ == '__main__':
     #TO PLOT FOR REPORT COULD CHANGE CROPPED_IMAGES TO IMAGES AND KMAX TO OTHER 
     #K-means Color Clustering Accuracy, Within Class Distance, nr of iterations, time (needed to converge) vs K
     #print("K-Mean Statistics Analysis: ")
-    #kmean_statistics(imgs, ground_truth_labels, Kmax=10, options=options)
+    # kmean_statistics(imgs, ground_truth_labels, Kmax=10, options=options)
 
-    threshold_accuracy(imgs, ground_truth_labels, options)
+    # threshold_accuracy(imgs, ground_truth_labels, options)
     #print(silhouette_bestk(imgs, options, ground_truth_labels))
     #print("colour accuracy")
     #print(np.mean(get_color_accuracy(kmeans_predicted_labels, ground_truth_labels)))

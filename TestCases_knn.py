@@ -13,7 +13,6 @@ class TestCases(unittest.TestCase):
             self.test_cases = pickle.load(f)
 
     def test_NIU(self):
-        # DON'T FORGET TO WRITE YOUR NIU AND GROUPS
         self.assertNotEqual(__authors__, "TO_BE_FILLED", msg="CHANGE IT TO YOUR NIU!")
         self.assertNotEqual(__group__, "TO_BE_FILLED", msg="CHANGE YOUR GROUP NAME!")
         self.assertIsInstance(__authors__, list)
