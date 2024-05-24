@@ -78,13 +78,16 @@ class KMeans:
         if self.options['km_init'].lower() == 'first':
             unique_elements, index = np.unique(self.X, axis=0, return_index=True)
             self.centroids = np.array([self.X[i] for i in sorted(index)[:self.K]])
+
         elif self.options['km_init'].lower() == 'random':
             self.centroids = np.random.rand(self.K, self.X.shape[1])
+
         elif self.options['km_init'].lower() == 'custom':
             diagonal_points = np.zeros((self.K, self.X.shape[1]))
             for i in range(self.K):
                 diagonal_points[i] = np.full((self.X.shape[1],), i)
             self.centroids = diagonal_points
+
         elif self.options['km_init'].lower() == 'naive_sharding':
             data_set = copy.deepcopy(self.X)
             self.centroids = np.mat(np.zeros((self.K, data_set.shape[1])))
@@ -100,7 +103,8 @@ class KMeans:
                     self.centroids[i:] = vfunc(np.sum(data_set[i*step:, 1:], axis=0), step)
                 else:
                     self.centroids[i:] = vfunc(np.sum(data_set[i * step:(i+1)*step, 1:], axis=0), step)
-                self.centroids = np.asarray(self.centroids)
+            self.centroids = np.asarray(self.centroids)
+
         elif self.options['km_init'].lower() == 'plus_plus':
             self.centroids = np.random.rand(self.K, self.X.shape[1])
             for k in range(1, self.K):
@@ -184,11 +188,12 @@ class KMeans:
         inter-class distance measures how well-separated the clusters are
         """
         inter_class_dist = []
-        num_pairs = 0
         for i in range(self.K):
+            labels_i = self.X[self.labels == i]
+            #print("labels i", labels_i)
+            expanded = labels_i[:, np.newaxis, :]
             for j in range(i + 1, self.K):
-                labels_i = self.X[self.labels == i]
-                expanded = labels_i[:, np.newaxis, :]
+                #print("labels j", self.X[self.labels == j])
                 distances = np.linalg.norm(expanded - self.X[self.labels == j], axis=-1)
                 inter_class_dist.append(np.mean(distances))
         return np.mean(inter_class_dist)
@@ -206,22 +211,55 @@ class KMeans:
         """
          sets the best k analysing the results up to 'max_K' clusters
         """
+        if self.options['fitting'] == 'WCD':
+            wcd_values = []
+            for k in range(2, max_K + 1):
+                self.K = k
+                self.fit()
+                wcd = self.withinClassDistance()
 
-        wcd_values = []
-        for k in range(2, max_K + 1):
-            self.K = k
-            self.fit()
-            wcd = self.withinClassDistance()
+                if k > 2:
+                    pct_decrease = 100 * (1 - (wcd / wcd_values[-1]))
+                    if pct_decrease < self.options['threshold']:
+                        self.K = k - 1
+                        return k - 1  # Return last k that was above the threshold
+                wcd_values.append(wcd)
 
-            if k > 2:
-                pct_decrease = 100 * (1 - (wcd / wcd_values[-1]))
-                if pct_decrease < self.options['threshold']:
-                    self.K = k - 1
-                    return k - 1  # Return last k that was above the threshold
-            wcd_values.append(wcd)
+            # If decrease never fell below the threshold
+            return max_K
 
-        # If decrease never fell below the threshold
-        return max_K
+        elif self.options['fitting'] == 'ICD':
+            icd_values = []
+            print('ICD')
+            for k in range(2, max_K + 1):
+                self.K = k
+                self.fit()
+                icd = self.interClassDistance()
+
+                if k > 2:
+                    pct_decrease = 100 * (1 - (icd / icd_values[-1]))
+                    if pct_decrease < self.options['threshold']:
+                        self.K = k - 1
+                        return k - 1  # Return last k that was above the threshold
+                icd_values.append(icd)
+            return max_K
+
+        elif self.options['fitting'] == 'FD':
+            fisher_values = []
+            for k in range(2, max_K + 1):
+                self.K = k
+                self.fit()
+                fd = self.fisherDiscriminant()
+
+                if k > 2:
+                    pct_decrease = 100 * (1 - (fd / fisher_values[-1]))
+                    if pct_decrease < self.options['threshold']:
+                        self.K = k - 1
+                        return k - 1  # Return last k that was above the threshold
+                fisher_values.append(fd)
+
+            # If decrease never fell below the threshold
+            return max_K
     
 
 def distance(X, C):
