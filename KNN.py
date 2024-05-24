@@ -47,26 +47,33 @@ class KNN:
         train_data = np.array(train_data, dtype=float)
         processed_data = [self._extract_features(img) for img in train_data]
         self.train_data = np.array(processed_data)
-        print(f"Training data shape after feature extraction: {self.train_data.shape}")
 
     def _extract_features(self, img):
         if self.feature_method == 1:
             # Flatten the image with optional resizing
             if self.downsample:
                 img = img[::self.downsample_factor, ::self.downsample_factor]
+
             return img.reshape(-1)
+
         elif self.feature_method == 2:
-            # Extract custom features: mean, variance, max, min pixel values
-            # mean_val = np.mean(img)
-            # var_val = np.var(img)
-            # upper_val = np.max(img)
-            # lower_val = np.min(img)
-            # return [mean_val, var_val, upper_val, lower_val]
+            #Extract custom features: mean, variance, max, min pixel values
+            flattened_img = img.reshape(-1)
+            mean_val = np.mean(img)
+            var_val = np.var(img)
+            upper_val = np.max(img)
+            lower_val = np.min(img)
+
+            return np.concatenate((flattened_img, [mean_val, var_val, upper_val, lower_val]))
+
+        elif self.feature_method == 3:
+            flattened_img = img.reshape(-1)
             hsv_img = rgb2hsv(img)
             hue_mean = np.mean(hsv_img[:, :, 0])
             saturation_mean = np.mean(hsv_img[:, :, 1])
             brightness_mean = np.mean(hsv_img[:, :, 2])
-            return [hue_mean, saturation_mean, brightness_mean]
+            return np.concatenate((flattened_img, [hue_mean, saturation_mean, brightness_mean]))
+
         else:
             raise ValueError("Invalid feature method specified")
 
@@ -95,7 +102,6 @@ class KNN:
     def get_k_neighbours_advanced(self, test_data, k):
         # Extract features for each image in the test set
         processed_test_data = np.array([self._extract_features(img) for img in test_data])
-        print(f"Test data shape after feature extraction: {processed_test_data.shape}")
 
         distances = cdist(processed_test_data, self.train_data)
         indices = np.argsort(distances, axis=1)[:, :k]

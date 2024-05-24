@@ -324,7 +324,10 @@ if __name__ == '__main__':
     plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=1, downsample=True, downsample_factor=2, method_label="Flatten With Downsampling")
 
     # Plot accuracy for custom features
-    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=2, downsample=False, method_label="Custom Features")
+    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=2, downsample=False, method_label="Additional Custom Features [mean, var, upper, lower]")
+
+    plot_knn_accuracy_for_dataset(train_imgs, train_class_labels, test_imgs, test_class_labels, k_range, feature_method=3, downsample=False, method_label="Additional Custom Features [hue_mean, saturation_mean, brightness_mean]")
+
    
   
     #########################################   KMEANS    #########################################
