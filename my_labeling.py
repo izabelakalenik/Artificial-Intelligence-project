@@ -1,8 +1,7 @@
 __authors__ = ['1716921', '1718541', '1720318']
 __group__ = '213'
 
-from sklearn.model_selection import train_test_split
-from utils_data import read_dataset, read_extended_dataset, crop_images, visualize_retrieval
+from utils_data import read_dataset, read_extended_dataset, crop_images
 from Kmeans import KMeans, get_colors
 from KNN import KNN
 import numpy as np
@@ -433,7 +432,7 @@ if __name__ == '__main__':
     #print("colour accuracy")
     #print(np.mean(get_color_accuracy(kmeans_predicted_labels, ground_truth_labels)))
 
-    ###############################QUALITATIVE ANALYSIS FUNCTIONS##################################
+    ###############################    QUALITATIVE ANALYSIS FUNCTIONS     ##################################
 
     ## Visualise images
     #visualize_retrieval(imgs[:60, :, :, :], 60, title="First 60 Images")

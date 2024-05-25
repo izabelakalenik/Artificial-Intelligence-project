@@ -1,11 +1,12 @@
 __authors__ = ['1716921', '1718541', '1720318']
-__group__ = 'noneyet'
+__group__ = '213'
 
 import numpy as np
 import utils
 import copy
 from math import floor
 from sklearn.metrics import silhouette_score
+
 
 class KMeans:
 
@@ -95,20 +96,20 @@ class KMeans:
             data_set = np.append(composite.T, data_set, axis=1)
             data_set.sort(axis=0)
 
-            step = floor(data_set.shape[0]/self.K)
+            step = floor(data_set.shape[0] / self.K)
             vfunc = np.vectorize(get_mean)
 
             for i in range(self.K):
-                if i == self.K-1:
-                    self.centroids[i:] = vfunc(np.sum(data_set[i*step:, 1:], axis=0), step)
+                if i == self.K - 1:
+                    self.centroids[i:] = vfunc(np.sum(data_set[i * step:, 1:], axis=0), step)
                 else:
-                    self.centroids[i:] = vfunc(np.sum(data_set[i * step:(i+1)*step, 1:], axis=0), step)
+                    self.centroids[i:] = vfunc(np.sum(data_set[i * step:(i + 1) * step, 1:], axis=0), step)
             self.centroids = np.asarray(self.centroids)
 
         elif self.options['km_init'].lower() == 'plus_plus':
             self.centroids = np.random.rand(self.K, self.X.shape[1])
             for k in range(1, self.K):
-                dist_sq = np.array([min([np.inner(c-x,c-x) for c in self.centroids]) for x in self.X])
+                dist_sq = np.array([min([np.inner(c - x, c - x) for c in self.centroids]) for x in self.X])
                 probs = dist_sq / dist_sq.sum()
                 cumulative_probs = probs.cumsum()
                 r = np.random.rand()
@@ -273,7 +274,6 @@ class KMeans:
         self.K = np.argmax(silhouette_img) + 2
 
 
-
 def distance(X, C):
     """
     Calculates the distance between each pixel and each centroid
@@ -307,4 +307,4 @@ def get_colors(centroids):
 
 
 def get_mean(sums, step):
-    return sums/step
+    return sums / step

@@ -4,7 +4,6 @@ __group__ = '213'
 import numpy as np
 from scipy.spatial.distance import cdist
 from collections import Counter
-from skimage.transform import resize
 from skimage.color import rgb2hsv
 
 
