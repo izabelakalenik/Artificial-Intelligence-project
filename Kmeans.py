@@ -1,5 +1,5 @@
-__authors__ = ['1716921', '1718541', '1720318']
-__group__ = '213'
+__authors__ = ['', '', '']
+__group__ = ''
 
 import numpy as np
 import utils
@@ -20,11 +20,8 @@ class KMeans:
         self.num_iter = 0
         self.K = K
         self._init_X(X)
-        self._init_options(options)  # DICT options
+        self._init_options(options)
 
-        #############################################################
-        ##  THIS FUNCTION CAN BE MODIFIED FROM THIS POINT, if needed
-        #############################################################
         self.labels = None
         self.centroids = None
         self.old_centroids = None
@@ -66,10 +63,6 @@ class KMeans:
 
             # If your methods need any other parameter you can add it to the options dictionary
         self.options = options
-
-        #############################################################
-        ##  THIS FUNCTION CAN BE MODIFIED FROM THIS POINT, if needed
-        #############################################################
 
     def _init_centroids(self):
         """

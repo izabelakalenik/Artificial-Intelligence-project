@@ -1,5 +1,5 @@
-__authors__ = ['1716921', '1718541', '1720318']
-__group__ = '213'
+__authors__ = ['', '', '']
+__group__ = ''
 
 from utils_data import read_dataset, read_extended_dataset, crop_images
 from Kmeans import KMeans, get_colors

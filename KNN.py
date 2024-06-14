@@ -1,5 +1,5 @@
-__authors__ = ['1716921', '1718541', '1720318']
-__group__ = '213'
+__authors__ = ['', '', '']
+__group__ = ''
 
 import numpy as np
 from scipy.spatial.distance import cdist
